@@ -1,0 +1,67 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x86, x64, ARM64]
+        configuration: [Release]
+
+    env:
+      DmfRootPath: C:\projects\DMF
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x' # Nuke suele requerir .NET 6 o superior
+        
+    - name: Clone and Patch DMF
+      shell: cmd
+      run: |
+        git clone -q https://github.com/microsoft/DMF.git C:\projects\DMF
+        cd C:\projects\DMF
+        git apply --reject "%GITHUB_WORKSPACE%\patches\dmf.diff"
+
+    - name: Download vpatch
+      shell: powershell
+      run: |
+        Invoke-WebRequest "https://github.com/nefarius/vpatch/releases/latest/download/vpatch.exe" -OutFile vpatch.exe
+
+    - name: Stamp version
+      shell: cmd
+      run: |
+        vpatch.exe --stamp-version "1.21.${{ github.run_number }}.0" --target-file ".\sys\ViGEmBus.vcxproj" --vcxproj.inf-time-stamp
+        vpatch.exe --stamp-version "1.21.${{ github.run_number }}.0" --target-file ".\sys\ViGEmBus.rc" --resource.file-version --resource.product-version
+
+    - name: Build
+      shell: cmd
+      run: .\build.cmd
+
+    - name: Make CAB
+      shell: cmd
+      run: makecab.exe /f ViGEmBus_${{ matrix.platform }}.ddf
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ViGEmBus_${{ matrix.platform }}
+        path: |
+          bin\**\ViGEmBus\*.inf
+          bin\**\ViGEmBus\*.sys
+          bin\**\*.pdb
+          disk1\*.cab
