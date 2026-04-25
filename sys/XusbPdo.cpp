@@ -44,7 +44,7 @@
 
 #include <ViGEm/km/BusShared.h>
 
-PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox 360 Controller";
+PCWSTR ViGEm::Bus::Targets::EmulationTargetXUSB::_deviceDescription = L"Virtual Xbox Classic Controller";
 
 ViGEm::Bus::Targets::EmulationTargetXUSB::EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId,
 	USHORT ProductId) : EmulationTargetPDO(

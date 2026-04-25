@@ -63,7 +63,7 @@ namespace ViGEm::Bus::Targets
 	class EmulationTargetXUSB : public Core::EmulationTargetPDO
 	{
 	public:
-		EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId = 0x045E, USHORT ProductId = 0x028E);
+		EmulationTargetXUSB(ULONG Serial, LONG SessionId, USHORT VendorId = 0x045E, USHORT ProductId = 0x0288);
 
 		NTSTATUS PdoPrepareDevice(PWDFDEVICE_INIT DeviceInit,
 		                          PUNICODE_STRING DeviceId,
